@@ -4,6 +4,8 @@ package port
 
 import (
 	"net/http"
+
+	"github.com/samolds/port/handler"
 )
 
 type Server struct {
@@ -21,9 +23,9 @@ func NewServer() (Server, error) {
 	//       method
 	//mux := newNotFoundMux()
 	mux := http.NewServeMux()
-	mux.Handle("/", errHandler(home))
-	mux.Handle("/links", errHandler(links))
-	mux.Handle("/now", errHandler(now))
+	mux.Handle("/", errHandler(handler.Home))
+	mux.Handle("/links", errHandler(handler.Links))
+	mux.Handle("/now", errHandler(handler.Now))
 	mux.Handle("/static", http.FileServer(http.Dir("./"+staticDir+"/")))
 
 	server := Server{Router: mux}

@@ -1,6 +1,6 @@
 // Copyright (C) 2018 Sam Olds
 
-package port
+package handler
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"github.com/samolds/port/template"
 )
 
-func home(w http.ResponseWriter, r *http.Request) error {
+func Home(w http.ResponseWriter, r *http.Request) error {
 	err := template.Home.Render(w, map[string]interface{}{})
 	if err != nil {
 		return err

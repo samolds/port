@@ -1,6 +1,6 @@
 // Copyright (C) 2018 Sam Olds
 
-package port
+package handler
 
 import (
 	"net/http"
@@ -8,8 +8,8 @@ import (
 	"github.com/samolds/port/template"
 )
 
-func now(w http.ResponseWriter, r *http.Request) error {
-	err := template.Now.Render(w, map[string]interface{}{})
+func Links(w http.ResponseWriter, r *http.Request) error {
+	err := template.Links.Render(w, map[string]interface{}{})
 	if err != nil {
 		return err
 	}

@@ -1,5 +1,8 @@
 # Port
-Source code for the samport - like a spaceport to the WWW for Sam's portfolio.
+Source code for my personal web server
+
+Too many analogies with port - like a spaceport or portal to the web for Sam's
+portfolio.
 
 ### Setup
 ```sh
