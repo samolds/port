@@ -3,65 +3,47 @@
 package template
 
 import (
-	"errors"
-	"fmt"
-	"html/template"
-	//"io/ioutil"
+	stdtemplate "html/template"
 	"net/http"
-	//"gopkg.in/webhelp.v1/wherr"
-	//"gopkg.in/webhelp.v1/whtmpl"
 )
 
 const (
-	templateDir = "/Users/samolds/projects/go/src/github.com/samolds/port/template/"
-	Home        = "home"
-	Links       = "links"
-	Now         = "now"
+	// make sure to update the definition in template/base.html if this changes
+	baseTmplName = "base"
+
+	homeTmplName  = "home"
+	linksTmplName = "links"
+	nowTmplName   = "now"
 )
 
 var (
-	baseTmpl  = templateDir + "base.html"
-	homeTmpl  = templateDir + Home + ".html"
-	linksTmpl = templateDir + Links + ".html"
-	nowTmpl   = templateDir + Now + ".html"
-	//masterTemplate = template.New("")
+	templateDir   = "/Users/samolds/projects/go/src/github.com/samolds/port/template/pages/"
+	baseTmplFile  = templateDir + baseTmplName + ".html"
+	homeTmplFile  = templateDir + homeTmplName + ".html"
+	linksTmplFile = templateDir + linksTmplName + ".html"
+	nowTmplFile   = templateDir + nowTmplName + ".html"
 
-	//// necessary to parse because it's used by other templates
-	//baseTemplate = mustParseBase(templateBase, templateDir+"base.html")
-
-	//_ = mustParse(baseTemplate, Home, templateDir+"home.html")
-	//_ = mustParse(baseTemplate, Links, templateDir+"links.html")
-	//_ = mustParse(baseTemplate, Now, templateDir+"now.html")
-
-	//templates = make(map[string]*template.Template)
-	Templates = map[string]*template.Template{
-		Home:  template.Must(template.New("base").ParseFiles(baseTmpl, homeTmpl)),
-		Links: template.Must(template.New("base").ParseFiles(baseTmpl, linksTmpl)),
-		Now:   template.Must(template.New("base").ParseFiles(baseTmpl, nowTmpl)),
-	}
+	// the exported templates that are available to render
+	Home  = mustParse(homeTmplFile)
+	Links = mustParse(linksTmplFile)
+	Now   = mustParse(nowTmplFile)
 )
 
-//func mustParseBase(name, tmplFile string) *template.Template {
-//	return template.Must(masterTemplate.New("").ParseFiles(tmplFile))
-//}
-//
-//func mustParse(baseTmpl *template.Template, name,
-//	tmplFile string) *template.Template {
-//	dupe := template.Must(baseTmpl.Clone())
-//	return template.Must(dupe.New(name).ParseFiles(tmplFile))
-//}
+type tmpl struct {
+	*stdtemplate.Template
+}
 
-// Render writes the template out to the response writer (or any errors
-// that come up), with value as the template value.
-func Render(w http.ResponseWriter, r *http.Request, tmplName string,
-	values interface{}) error {
-	tmpl, exists := Templates[tmplName]
-	if !exists {
-		return errors.New(fmt.Sprintf("no template %#v registered", tmplName))
-	}
+func mustParse(tmplFile string) tmpl {
+	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(
+		baseTmplFile, tmplFile))
+	return tmpl{Template: t}
+}
 
+// Render writes the template out to the response writer (or any errors that
+// come up), with values as the template value.
+func (t tmpl) Render(w http.ResponseWriter, values interface{}) error {
 	w.Header().Set("Content-Type", "text/html")
-	err := tmpl.Execute(w, values)
+	err := t.Template.Execute(w, values)
 	if err != nil {
 		return err
 	}

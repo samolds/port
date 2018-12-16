@@ -9,7 +9,7 @@ import (
 )
 
 func home(w http.ResponseWriter, r *http.Request) error {
-	err := template.Render(w, r, template.Home, map[string]interface{}{})
+	err := template.Home.Render(w, map[string]interface{}{})
 	if err != nil {
 		return err
 	}

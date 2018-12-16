@@ -9,7 +9,7 @@ import (
 )
 
 func links(w http.ResponseWriter, r *http.Request) error {
-	err := template.Render(w, r, template.Links, map[string]interface{}{})
+	err := template.Links.Render(w, map[string]interface{}{})
 	if err != nil {
 		return err
 	}
