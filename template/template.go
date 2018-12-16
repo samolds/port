@@ -3,7 +3,9 @@
 package template
 
 import (
+	"bytes"
 	stdtemplate "html/template"
+	"io"
 	"net/http"
 )
 
@@ -34,18 +36,22 @@ type tmpl struct {
 }
 
 func mustParse(tmplFile string) tmpl {
-	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(
-		baseTmplFile, tmplFile))
+	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(baseTmplFile,
+		tmplFile))
 	return tmpl{Template: t}
 }
 
 // Render writes the template out to the response writer (or any errors that
-// come up), with values as the template value.
+// come up), with values as the template value. If there were errors rendering
+// the template, they will not be written out to the writer.
 func (t tmpl) Render(w http.ResponseWriter, values interface{}) error {
+	var buf bytes.Buffer
 	w.Header().Set("Content-Type", "text/html")
-	err := t.Template.Execute(w, values)
+	w.WriteHeader(http.StatusOK) // TODO: currently redundant
+	err := t.Template.Execute(&buf, values)
 	if err != nil {
 		return err
 	}
-	return nil
+	_, err = io.Copy(w, &buf)
+	return err
 }

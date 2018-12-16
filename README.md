@@ -4,6 +4,10 @@ Source code for my personal web server
 Too many analogies with port - like a spaceport or portal to the web for Sam's
 portfolio.
 
+### About
+This is an exercise in writing a simple, clean, idiomatic web server with only
+the std lib.
+
 ### Setup
 ```sh
 go get github.com/samolds/port
@@ -24,3 +28,4 @@ go install .../portd && ./bin/portd
 * github.com/zeebo/errs
 * github.com/go-chi/chi
 * cloud.google.com/go
+* github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf/app
