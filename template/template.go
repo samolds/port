@@ -12,10 +12,6 @@ import (
 const (
 	// make sure to update the definition in template/base.html if this changes
 	baseTmplName = "base"
-
-	homeTmplName  = "home"
-	linksTmplName = "links"
-	nowTmplName   = "now"
 )
 
 var (
@@ -23,14 +19,16 @@ var (
 	templateDir = "src/github.com/samolds/port/template/pages/"
 
 	baseTmplFile  = templateDir + baseTmplName + ".html"
-	homeTmplFile  = templateDir + homeTmplName + ".html"
-	linksTmplFile = templateDir + linksTmplName + ".html"
-	nowTmplFile   = templateDir + nowTmplName + ".html"
+	homeTmplFile  = templateDir + "home.html"
+	linksTmplFile = templateDir + "links.html"
+	nowTmplFile   = templateDir + "now.html"
+	errorTmplFile = templateDir + "error.html"
 
 	// the exported templates that are available to render
 	Home  = mustParse(homeTmplFile)
 	Links = mustParse(linksTmplFile)
 	Now   = mustParse(nowTmplFile)
+	Error = mustParse(errorTmplFile)
 )
 
 type tmpl struct {
@@ -49,7 +47,7 @@ func mustParse(tmplFile string) tmpl {
 func (t tmpl) Render(w http.ResponseWriter, values interface{}) error {
 	var buf bytes.Buffer
 	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK) // TODO: currently redundant
+	//w.WriteHeader(http.StatusOK) // TODO: currently redundant
 	err := t.Template.Execute(&buf, values)
 	if err != nil {
 		return err

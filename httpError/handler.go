@@ -5,6 +5,8 @@ package httpError
 import (
 	"log"
 	"net/http"
+
+	"github.com/samolds/port/template"
 )
 
 // Handler is a handler with a returned error.
@@ -22,6 +24,10 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	herr := Catch(err)
 	if err != nil {
 		log.Printf("error: %s", err)
-		http.Error(w, herr.Error(), herr.StatusCode)
+		w.WriteHeader(herr.StatusCode)
+		err = template.Error.Render(w, herr.Error())
+		if err != nil {
+			http.Error(w, err.Error(), herr.StatusCode)
+		}
 	}
 }

@@ -3,6 +3,7 @@
 package port
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/samolds/port/handler"
@@ -25,7 +26,11 @@ func NewServer() (Server, error) {
 	mux.Handle("GET", "", httpError.Handler(handler.Home))
 	mux.Handle("GET", "/now", httpError.Handler(handler.Now))
 	mux.Handle("GET", "/links", httpError.Handler(handler.Links))
+	//mux.Handle("GET", "/a/b/c", httpError.Handler(handler.Links))
 	mux.HandleDir("GET", "/static", http.FileServer(http.Dir("./"+staticDir+"/")))
+
+	log.Printf("%#v\n", mux.sub)
+	log.Printf("%#v\n", mux.methods)
 
 	//mux := http.NewServeMux()
 	//mux.Handle("/", herr(handler.Home))
