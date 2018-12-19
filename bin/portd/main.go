@@ -34,12 +34,22 @@ func runner() error {
 	return http.ListenAndServe(*tcpPort, logResponses(server.Router))
 }
 
+// logResponses takes a Handler and makes it log responses
+func logResponses(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ww := &responseWriterWrapper{rw: w}
+		start := time.Now()
+		h.ServeHTTP(ww, r)
+		log.Printf(`%s %d %#v %d %d`, r.Method, ww.statusCode, r.RequestURI,
+			r.ContentLength, time.Since(start))
+	})
+}
+
 // responseWriterWrapper is used to keep track of the status code written back
 // for logging purposes
 type responseWriterWrapper struct {
-	rw          http.ResponseWriter
-	wroteHeader bool
-	statusCode  int
+	rw         http.ResponseWriter
+	statusCode int
 }
 
 func (w *responseWriterWrapper) Header() http.Header {
@@ -51,18 +61,6 @@ func (w *responseWriterWrapper) Write(data []byte) (int, error) {
 }
 
 func (w *responseWriterWrapper) WriteHeader(statusCode int) {
-	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.rw.WriteHeader(statusCode)
-}
-
-// logResponses takes a Handler and makes it log responses
-func logResponses(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ww := &responseWriterWrapper{rw: w}
-		start := time.Now()
-		h.ServeHTTP(ww, r)
-		log.Printf(`%s %d %#v %d %d`, r.Method, ww.statusCode, r.RequestURI,
-			r.ContentLength, time.Since(start))
-	})
 }

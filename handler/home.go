@@ -12,7 +12,7 @@ import (
 func Home(w http.ResponseWriter, r *http.Request) error {
 	err := template.Home.Render(w, map[string]interface{}{})
 	if err != nil {
-		return httpError.New(err, "", http.StatusInternalServerError)
+		return httpError.New(err.Error(), http.StatusInternalServerError)
 	}
 	return nil
 }

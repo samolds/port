@@ -3,86 +3,86 @@
 package port
 
 import (
-	"errors"
-	"fmt"
-	"log"
 	"net/http"
+	"strings"
+	"sync"
 
 	"github.com/samolds/port/httpError"
 )
 
-// TODO: make notFoundMux a richMux
-// TODO: this doesn't work for static file serving!
-// not found mux
-// vvvvvvvvvvvvvvvvv
-type notFoundMux struct {
-	*http.ServeMux
-	routes map[string]interface{}
+type richMux struct {
+	mu     sync.Mutex
+	routes map[string]muxEntry
 }
 
-func newNotFoundMux() *notFoundMux {
-	mux := http.NewServeMux()
-	routes := make(map[string]interface{})
-	return &notFoundMux{ServeMux: mux, routes: routes}
+type muxEntry struct {
+	http.Handler
+
+	isDir  bool
+	path   string
+	method string
 }
 
-func (h *notFoundMux) Handle(pattern string, handler http.Handler) {
-	_, exists := h.routes[pattern]
+func NewRichMux() richMux {
+	return richMux{routes: make(map[string]muxEntry)}
+}
+
+func (m richMux) handle(method string, path string, isDir bool,
+	handler http.Handler) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	method = strings.ToUpper(method)
+	if method != "GET" && method != "POST" && method != "PUT" &&
+		method != "DELETE" {
+		panic(method + " is an unsupported method")
+	}
+
+	path = strings.Trim(path, "/")
+	_, exists := m.routes[path]
 	if exists {
-		panic("duplicate routes registered")
+		panic(path + " path already registered")
 	}
 
-	h.routes[pattern] = new(interface{})
-	h.ServeMux.Handle(pattern, handler)
+	m.routes[path] = muxEntry{
+		Handler: handler,
+		isDir:   isDir,
+		path:    path,
+		method:  method,
+	}
 }
 
-func (h *notFoundMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, exists := h.routes[r.URL.Path]
-	if !exists {
-		log.Printf("error: 404 not found: %s", r.URL.Path)
-		http.Error(w, fmt.Sprintf("404 path %s not found", r.URL.Path),
-			http.StatusNotFound)
-		return
-	}
-
-	h.ServeMux.ServeHTTP(w, r)
+func (m richMux) Handle(method string, path string,
+	handler http.Handler) {
+	m.handle(method, path, false, handler)
 }
 
-// ^^^^^^^^^^^^^^^^^
-// catchPanic can be used to catch panics and turn them into errors.
-func catchPanic(errRef *error) {
-	r := recover()
-	if r == nil {
-		return
-	}
-	err, ok := r.(error)
-	if ok {
-		*errRef = errors.New(fmt.Sprintf("panic: %v", err))
-		return
-	}
-	*errRef = errors.New(fmt.Sprintf("%v", r))
+func (m richMux) HandleDir(method string, path string,
+	handler http.Handler) {
+	m.handle(method, path, true, handler)
 }
 
-// ^^^^^^^^^^^^^^^^^
+// TODO: finish this
+func (m richMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	httpError.Handler(func(writer http.ResponseWriter, req *http.Request) error {
+		path := strings.Trim(r.URL.Path, "/")
 
-// err handler
-// vvvvvvvvvvvvvvvvv
+		entry, exists := m.routes[path]
+		if !exists {
+			return httpError.New(r.URL.Path+" cannot be found", http.StatusNotFound)
+		}
 
-// errHandler is a handler with a returned error.
-type errHandler func(w http.ResponseWriter, req *http.Request) error
+		if entry.method != r.Method {
+			return httpError.New(r.Method+" is unsupported",
+				http.StatusMethodNotAllowed)
+		}
 
-// ServeHTTP is so that errHandler is a proper handler and can be used with
-// incoming requests.
-func (eh errHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("r.URL.Path = %s", r.URL.Path)
-	err := func() (err error) {
-		defer catchPanic(&err)
-		return eh(w, r)
-	}()
+		if entry.isDir {
+			entry.Handler.ServeHTTP(writer, req)
+			return nil
+		}
 
-	herr := httpError.Catch(err)
-	if err != nil {
-		log.Printf("error: %s", err)
-		http.Error(w, herr.Error(), herr.StatusCode)
-	}
+		entry.Handler.ServeHTTP(writer, req)
+		return nil
+	}).ServeHTTP(w, r)
 }

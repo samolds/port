@@ -19,7 +19,9 @@ const (
 )
 
 var (
-	templateDir   = "/Users/samolds/projects/go/src/github.com/samolds/port/template/pages/"
+	// TODO: make this not hardcoded
+	templateDir = "src/github.com/samolds/port/template/pages/"
+
 	baseTmplFile  = templateDir + baseTmplName + ".html"
 	homeTmplFile  = templateDir + homeTmplName + ".html"
 	linksTmplFile = templateDir + linksTmplName + ".html"
