@@ -71,6 +71,7 @@ func (m *SimpleMux) Handle(me string, p string, h http.Handler) {
 }
 
 func (m *SimpleMux) HandleDir(me string, p string, h http.Handler) {
+	h = http.StripPrefix(p, h)
 	m.mux.handle(me, p, true, h)
 }
 
@@ -109,6 +110,10 @@ func (m *SimpleMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			m.unsupportedMethodHandler.ServeHTTP(w, r)
 		}
 		return
+	}
+
+	// TODO: somehow catch if the file server throws an error and catch it here?
+	if ptr.dirServe {
 	}
 
 	h.ServeHTTP(w, r)

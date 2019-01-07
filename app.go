@@ -29,7 +29,6 @@ func NewServer() (Server, error) {
 	mux.Handle("GET", "", herr(handler.Home))
 	mux.Handle("GET", "/now", herr(handler.Now))
 	mux.Handle("GET", "/links", herr(handler.Links))
-	// TODO: get this working
 	mux.HandleDir("GET", "/static", http.FileServer(http.Dir("./"+staticDir+"/")))
 
 	server := Server{Router: mux}
