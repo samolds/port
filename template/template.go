@@ -47,11 +47,12 @@ func mustParse(tmplFile string) tmpl {
 func (t tmpl) Render(w http.ResponseWriter, values interface{}) error {
 	var buf bytes.Buffer
 	w.Header().Set("Content-Type", "text/html")
-	//w.WriteHeader(http.StatusOK) // TODO: currently redundant
+	w.WriteHeader(http.StatusOK)
 	err := t.Template.Execute(&buf, values)
 	if err != nil {
 		return err
 	}
+
 	_, err = io.Copy(w, &buf)
 	return err
 }

@@ -3,11 +3,11 @@
 package port
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/samolds/port/handler"
-	"github.com/samolds/port/httpError"
+	"github.com/samolds/port/httperror"
+	"github.com/samolds/port/httpmux"
 )
 
 type Server struct {
@@ -22,22 +22,20 @@ var (
 
 // New initializes a new http handler for this web server.
 func NewServer() (Server, error) {
-	mux := NewRichMux()
-	mux.Handle("GET", "", httpError.Handler(handler.Home))
-	mux.Handle("GET", "/now", httpError.Handler(handler.Now))
-	mux.Handle("GET", "/links", httpError.Handler(handler.Links))
-	//mux.Handle("GET", "/a/b/c", httpError.Handler(handler.Links))
+	mux := httpmux.New()
+	mux.RegisterNotFoundHandler(herr(handler.NotFound))
+	mux.RegisterUnsupportedMethodHandler(herr(handler.UnsupportedMethod))
+
+	mux.Handle("GET", "", herr(handler.Home))
+	mux.Handle("GET", "/now", herr(handler.Now))
+	mux.Handle("GET", "/links", herr(handler.Links))
+	// TODO: get this working
 	mux.HandleDir("GET", "/static", http.FileServer(http.Dir("./"+staticDir+"/")))
-
-	log.Printf("%#v\n", mux.sub)
-	log.Printf("%#v\n", mux.methods)
-
-	//mux := http.NewServeMux()
-	//mux.Handle("/", herr(handler.Home))
-	//mux.Handle("/links", herr(handler.Links))
-	//mux.Handle("/now", herr(handler.Now))
-	//mux.Handle("/static/", http.FileServer(http.Dir("./"+staticDir+"/")))
 
 	server := Server{Router: mux}
 	return server, nil
+}
+
+func herr(h func(http.ResponseWriter, *http.Request) error) httperror.Handler {
+	return httperror.Handler(h)
 }

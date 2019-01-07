@@ -1,6 +1,6 @@
 // Copyright (C) 2018 Sam Olds
 
-package httpError
+package httperror
 
 import (
 	"errors"
