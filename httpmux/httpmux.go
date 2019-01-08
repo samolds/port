@@ -20,13 +20,23 @@ type mux struct {
 }
 
 func New() *SimpleMux {
-	return &SimpleMux{}
+	m := &SimpleMux{}
+	m.notFoundHandler = http.HandlerFunc(func(w http.ResponseWriter,
+		r *http.Request) {
+		http.Error(w, "'"+r.URL.Path+"' cannot be found", http.StatusNotFound)
+	})
+	m.unsupportedMethodHandler = http.HandlerFunc(func(w http.ResponseWriter,
+		r *http.Request) {
+		http.Error(w, "'"+r.Method+"' is unsupported", http.StatusMethodNotAllowed)
+	})
+	return m
 }
 
 // handle will store the provided method and pattern in the muxer, building a
 // tree that can be used by ServeHTTP to handle the requests
 //
 // NOTE: this simple muxer does not currently support url parameters
+// TODO: add support for url parameters
 func (m *mux) handle(method string, pattern string, dirServe bool,
 	handler http.Handler) {
 	method = strings.ToUpper(method)
@@ -86,11 +96,7 @@ func (m *SimpleMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var exists bool
 		ptr, exists = ptr.sub[bit]
 		if !exists {
-			if m.notFoundHandler == nil {
-				http.Error(w, "'"+r.URL.Path+"' cannot be found", http.StatusNotFound)
-			} else {
-				m.notFoundHandler.ServeHTTP(w, r)
-			}
+			m.notFoundHandler.ServeHTTP(w, r)
 			return
 		}
 
@@ -103,17 +109,14 @@ func (m *SimpleMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	h, exists := ptr.methods[r.Method]
 	if !exists {
-		if m.unsupportedMethodHandler == nil {
-			http.Error(w, "'"+r.Method+"' is unsupported",
-				http.StatusMethodNotAllowed)
-		} else {
-			m.unsupportedMethodHandler.ServeHTTP(w, r)
-		}
+		m.unsupportedMethodHandler.ServeHTTP(w, r)
 		return
 	}
 
-	// TODO: somehow catch if the file server throws an error and catch it here?
 	if ptr.dirServe {
+		// TODO: somehow catch if the file server throws an error and catch it
+		// here? maybe do a stat on the file trying to be served in the static
+		// directory to see if it exists?
 	}
 
 	h.ServeHTTP(w, r)

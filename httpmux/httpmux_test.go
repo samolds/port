@@ -4,8 +4,11 @@ package httpmux
 
 import (
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/samolds/port/testhelp"
@@ -97,4 +100,53 @@ func TestFlatHandlers(t *testing.T) {
 	run(tt, mux, "GET", "one", http.StatusOK, "GET one")
 	run(tt, mux, "GET", "/two", http.StatusOK, "GET two")
 	run(tt, mux, "GET", "/three/", http.StatusOK, "GET three")
+}
+
+// TestHandleDir will test that a fileserver is correctly routed
+func TestHandleDir(t *testing.T) {
+	tt := testhelp.New(t)
+
+	// create a temporarys static-assets directory
+	tempDir, err := ioutil.TempDir("", "static-assets")
+	tt.AssertNoError(err)
+	defer os.RemoveAll(tempDir)
+
+	staticFileContents := "contents of text file - hi"
+	content := []byte(staticFileContents)
+	tmpfn := filepath.Join(tempDir, "file.txt")
+	err = ioutil.WriteFile(tmpfn, content, 0666)
+	tt.AssertNoError(err)
+
+	// initialize the mux
+	mux := New()
+	mux.HandleDir("GET", "/st", http.FileServer(http.Dir(tempDir)))
+
+	// make a request at the root of the file server
+	req, err := http.NewRequest("GET", "/st", nil)
+	tt.AssertNoError(err)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	// make sure it returned successfully
+	tt.AssertEqual(rec.Code, http.StatusOK)
+	tt.AssertNotEqual("", rec.Body.String())
+
+	// make a request for the dummy file we put in the static assets directory
+	req, err = http.NewRequest("GET", "/st/file.txt", nil)
+	tt.AssertNoError(err)
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	// make sure the file contents were returned
+	tt.AssertEqual(rec.Code, http.StatusOK)
+	tt.AssertEqual(staticFileContents, rec.Body.String())
+
+	// make a request for a non existent dummy file
+	req, err = http.NewRequest("GET", "/st/doesntExist.txt", nil)
+	tt.AssertNoError(err)
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	// make sure we get back a 404
+	tt.AssertEqual(rec.Code, http.StatusNotFound)
 }

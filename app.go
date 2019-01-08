@@ -10,26 +10,28 @@ import (
 	"github.com/samolds/port/httpmux"
 )
 
+type Options struct {
+	StaticDir string
+}
+
 type Server struct {
 	DB     string // TODO: unused
 	Router http.Handler
 }
 
-var (
-	// TODO: make this not hardcoded
-	staticDir = "src/github.com/samolds/port/static"
-)
-
 // New initializes a new http handler for this web server.
-func NewServer() (Server, error) {
+func NewServer(opts Options) (Server, error) {
 	mux := httpmux.New()
 	mux.RegisterNotFoundHandler(herr(handler.NotFound))
 	mux.RegisterUnsupportedMethodHandler(herr(handler.UnsupportedMethod))
 
-	mux.Handle("GET", "", herr(handler.Home))
+	mux.Handle("GET", "/", herr(handler.Home))
 	mux.Handle("GET", "/now", herr(handler.Now))
 	mux.Handle("GET", "/links", herr(handler.Links))
-	mux.HandleDir("GET", "/static", http.FileServer(http.Dir("./"+staticDir+"/")))
+
+	if opts.StaticDir != "" {
+		mux.HandleDir("GET", "/static", http.FileServer(http.Dir(opts.StaticDir)))
+	}
 
 	server := Server{Router: mux}
 	return server, nil
