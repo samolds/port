@@ -1,0 +1,8 @@
+{{ define "content" }}
+<p>I'm an Internet person in all of these locations:</p>
+<ul>
+{{ range $_, $link := . }}
+  <li><a href="{{ $link.Href }}">{{ $link.Display }}</a></li>
+{{ end }}
+</ul>
+{{ end }}

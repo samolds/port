@@ -20,13 +20,13 @@ var (
 
 	baseTmplFile  = templateDir + baseTmplName + ".html"
 	homeTmplFile  = templateDir + "home.html"
-	linksTmplFile = templateDir + "links.html"
+	linkTmplFile  = templateDir + "link.html"
 	nowTmplFile   = templateDir + "now.html"
 	errorTmplFile = templateDir + "error.html"
 
 	// the exported templates that are available to render
 	Home  = mustParse(homeTmplFile)
-	Links = mustParse(linksTmplFile)
+	Link  = mustParse(linkTmplFile)
 	Now   = mustParse(nowTmplFile)
 	Error = mustParse(errorTmplFile)
 )
@@ -46,13 +46,13 @@ func mustParse(tmplFile string) tmpl {
 // the template, they will not be written out to the writer.
 func (t tmpl) Render(w http.ResponseWriter, values interface{}) error {
 	var buf bytes.Buffer
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK)
 	err := t.Template.Execute(&buf, values)
 	if err != nil {
 		return err
 	}
 
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
 	_, err = io.Copy(w, &buf)
 	return err
 }
