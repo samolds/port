@@ -1,4 +1,6 @@
 {{ define "content" }}
+{{ if .profileImgSrc }}
 <img class="profile-img" alt="sam" src="{{ .profileImgSrc }}"/>
+{{ end }}
 {{ .htmlText }}
 {{ end }}

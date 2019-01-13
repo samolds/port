@@ -17,6 +17,13 @@ go get github.com/samolds/port
 ```sh
 cd $GOPATH
 go install .../portd && ./bin/portd
+
+
+go install .../portd && ./bin/portd
+  --port=":8080"
+  --static-dir="/Users/samolds/projects/go/src/github.com/samolds/port/bin/portd/static"
+  --gae-project-id="samolds"
+  --gae-cred-file="/Users/samolds/projects/go/src/github.com/samolds/port/assetdump/gae_cred_file_samolds.json"
 ```
 
 ### Interesting Libraries to explore

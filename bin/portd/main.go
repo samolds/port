@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -14,10 +15,14 @@ import (
 var (
 	tcpPort = flag.String("port", ":8080", "port to listen on")
 
-	// like:
-	//   /Users/samolds/projects/go/src/github.com/samolds/port/static
 	staticDir = flag.String("static-dir", "",
 		"absolute path to directory with static assets")
+
+	gaeProjectID = flag.String("gae-project-id", "",
+		"the project id for this google app engine project")
+
+	gaeCredFile = flag.String("gae-cred-file", "",
+		"the path to the credential file for google app engine")
 )
 
 // main you know what did is.
@@ -33,13 +38,16 @@ func main() {
 // everywhere, and main is just responsible for calling log.Fatalf on errors.
 func runner() error {
 	opts := port.Options{
-		StaticDir: *staticDir,
+		StaticDir:    *staticDir,
+		GAEProjectID: *gaeProjectID,
+		GAECredFile:  *gaeCredFile,
 	}
 
-	server, err := port.NewServer(opts)
+	ctx := context.Background()
+	server, err := port.NewServer(ctx, opts)
 	if err != nil {
 		return err
 	}
 
-	return http.ListenAndServe(*tcpPort, httplog.LogResponses(server.Router))
+	return http.ListenAndServe(*tcpPort, httplog.LogResponses(server))
 }
