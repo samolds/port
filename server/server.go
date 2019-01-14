@@ -14,9 +14,10 @@ import (
 )
 
 type Options struct {
-	StaticDir    string
-	GAEProjectID string
-	GAECredFile  string
+	StaticDir      string
+	GAEProjectID   string
+	GAECredFile    string
+	RelHTMLTmplDir string
 }
 
 type Server struct {
@@ -31,6 +32,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // New initializes a new http handler for this web server.
 func New(ctx context.Context, opts Options) (*Server, error) {
 	server := &Server{}
+
+	err := template.Initialize(opts.RelHTMLTmplDir)
+	if err != nil {
+		return nil, err
+	}
 
 	db, err := database.New(ctx, opts.GAEProjectID, opts.GAECredFile)
 	if err != nil {

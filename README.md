@@ -16,14 +16,32 @@ go get github.com/samolds/port
 ### Run Dev Version
 ```sh
 cd $GOPATH
-go install .../portd && ./bin/portd
+go install .../port && ./bin/port
+```
 
+OR
 
-go install .../portd && ./bin/portd
+```sh
+go install .../port && ./bin/port
   --port=":8080"
-  --static-dir="/Users/samolds/projects/go/src/github.com/samolds/port/bin/portd/static"
+  --static-dir="/Users/samolds/projects/go/src/github.com/samolds/port/static"
   --gae-project-id="samolds"
-  --gae-cred-file="/Users/samolds/projects/go/src/github.com/samolds/port/assetdump/gae_cred_file_samolds.json"
+  --gae-cred-file="/Users/samolds/projects/go/src/github.com/samolds/port/static/assetdump/gae_cred_file_samolds.json"
+  --rel-html-tmpl-dir="src/github.com/samolds/port/template/pages"
+```
+
+
+### To Test Everything
+```sh
+go test .../port/...
+```
+
+
+### To Deploy
+In directory with app.yaml
+
+```sh
+gcloud app deploy
 ```
 
 ### Interesting Libraries to explore

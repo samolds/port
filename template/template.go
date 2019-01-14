@@ -4,12 +4,12 @@ package template
 
 import (
 	"bytes"
+	"errors"
 	stdtemplate "html/template"
 	"io"
 	"net/http"
 	"path"
 	"path/filepath"
-	"runtime"
 )
 
 const (
@@ -18,8 +18,6 @@ const (
 )
 
 var (
-	relTemplateDir = "pages/"
-
 	baseTmplFile  = baseTmplName + ".html"
 	homeTmplFile  = "home.html"
 	linkTmplFile  = "link.html"
@@ -27,23 +25,34 @@ var (
 	errorTmplFile = "error.html"
 
 	// the exported templates that are available to render
-	Home  = mustParse(homeTmplFile)
-	Link  = mustParse(linkTmplFile)
-	Now   = mustParse(nowTmplFile)
-	Error = mustParse(errorTmplFile)
+	Home  tmpl
+	Link  tmpl
+	Now   tmpl
+	Error tmpl
 )
+
+func Initialize(relTmplDir string) error {
+	if relTmplDir == "" {
+		return errors.New("a path to the directory of templates is required")
+	}
+
+	templateDir, err := filepath.Abs(relTmplDir)
+	if err != nil {
+		return err
+	}
+
+	Home = mustParse(templateDir, homeTmplFile)
+	Link = mustParse(templateDir, linkTmplFile)
+	Now = mustParse(templateDir, nowTmplFile)
+	Error = mustParse(templateDir, errorTmplFile)
+	return nil
+}
 
 type tmpl struct {
 	*stdtemplate.Template
 }
 
-func mustParse(tmplFile string) tmpl {
-	_, currFile, _, ok := runtime.Caller(1)
-	if !ok {
-		panic("can't find templates")
-	}
-	templateDir := filepath.Join(filepath.Dir(currFile), relTemplateDir)
-
+func mustParse(templateDir string, tmplFile string) tmpl {
 	base := path.Join(templateDir, baseTmplFile)
 	cont := path.Join(templateDir, tmplFile)
 	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(base, cont))

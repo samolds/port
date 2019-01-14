@@ -25,6 +25,9 @@ var (
 
 	gaeCredFile = flag.String("gae-cred-file", "",
 		"the path to the credential file for google app engine")
+
+	relHTMLTmplDir = flag.String("rel-html-tmpl-dir", "",
+		"the relative path to the directory with all of the html templates")
 )
 
 // main you know what did is.
@@ -41,9 +44,10 @@ func main() {
 // everywhere, and main is just responsible for calling log.Fatalf on errors.
 func runner() error {
 	opts := server.Options{
-		StaticDir:    *staticDir,
-		GAEProjectID: *gaeProjectID,
-		GAECredFile:  *gaeCredFile,
+		StaticDir:      *staticDir,
+		GAEProjectID:   *gaeProjectID,
+		GAECredFile:    *gaeCredFile,
+		RelHTMLTmplDir: *relHTMLTmplDir,
 	}
 
 	ctx := context.Background()
@@ -60,7 +64,7 @@ func runner() error {
 // on stupid GAE and is expecting environment variables instead. dumb
 func envVarCheck() {
 	flags := *tcpPort != "" || *staticDir != "" || *gaeProjectID != "" ||
-		*gaeCredFile != ""
+		*gaeCredFile != "" || *relHTMLTmplDir != ""
 	if flags {
 		return
 	}
@@ -69,6 +73,7 @@ func envVarCheck() {
 	*staticDir = os.Getenv("STATIC_DIR")
 	*gaeProjectID = os.Getenv("GAE_PROJECT_ID")
 	*gaeCredFile = os.Getenv("GAE_CRED_FILE")
+	*relHTMLTmplDir = os.Getenv("REL_HTML_TMPL_DIR")
 
 	// prepend ":" to the port if it wasn't provided by dumb gae
 	p := *tcpPort
