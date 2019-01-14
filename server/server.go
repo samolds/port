@@ -1,6 +1,6 @@
 // Copyright (C) 2018 - 2019 Sam Olds
 
-package port
+package server
 
 import (
 	"context"
@@ -29,7 +29,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // New initializes a new http handler for this web server.
-func NewServer(ctx context.Context, opts Options) (*Server, error) {
+func New(ctx context.Context, opts Options) (*Server, error) {
 	server := &Server{}
 
 	db, err := database.New(ctx, opts.GAEProjectID, opts.GAECredFile)

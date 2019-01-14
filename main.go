@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/samolds/port"
 	"github.com/samolds/port/httplog"
+	"github.com/samolds/port/server"
 )
 
 var (
@@ -40,14 +40,14 @@ func main() {
 // runner is the "real" main so that we can be idiomatic and just return errors
 // everywhere, and main is just responsible for calling log.Fatalf on errors.
 func runner() error {
-	opts := port.Options{
+	opts := server.Options{
 		StaticDir:    *staticDir,
 		GAEProjectID: *gaeProjectID,
 		GAECredFile:  *gaeCredFile,
 	}
 
 	ctx := context.Background()
-	server, err := port.NewServer(ctx, opts)
+	server, err := server.New(ctx, opts)
 	if err != nil {
 		return err
 	}

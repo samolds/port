@@ -7,4 +7,4 @@
 ._.DS_Store
 
 ## Secrets
-assetdump/gae_cred_file_samolds.json
+static/assetdump/gae_cred_file_samolds.json
