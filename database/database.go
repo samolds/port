@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Sam Olds
+// Copyright (C) 2018 - 2019 Sam Olds
 
 package database
 
@@ -15,21 +15,25 @@ type DB struct {
 	gaeDatastore *datastore.Client
 }
 
-func New(ctx context.Context, dbID string, credFile string) (*DB, error) {
+func New(ctx context.Context, dbID string, credFile string) (db *DB,
+	err error) {
 	if dbID == "" {
 		return nil, errors.New("a database id is required")
 	}
 
+	db = &DB{}
 	if credFile == "" {
-		return nil, errors.New("a credentials file is required")
+		db.gaeDatastore, err = datastore.NewClient(ctx, dbID)
+	} else {
+		db.gaeDatastore, err = datastore.NewClient(ctx, dbID,
+			option.WithCredentialsFile(credFile))
 	}
 
-	db, err := datastore.NewClient(ctx, dbID,
-		option.WithCredentialsFile(credFile))
 	if err != nil {
 		return nil, err
 	}
-	return &DB{gaeDatastore: db}, nil
+
+	return db, nil
 }
 
 func (db *DB) Get(ctx context.Context, kind Kind, id string) (

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Sam Olds
+// Copyright (C) 2018 - 2019 Sam Olds
 
 package template
 
@@ -7,6 +7,9 @@ import (
 	stdtemplate "html/template"
 	"io"
 	"net/http"
+	"path"
+	"path/filepath"
+	"runtime"
 )
 
 const (
@@ -15,14 +18,13 @@ const (
 )
 
 var (
-	// TODO: make this not hardcoded
-	templateDir = "src/github.com/samolds/port/template/pages/"
+	relTemplateDir = "pages/"
 
-	baseTmplFile  = templateDir + baseTmplName + ".html"
-	homeTmplFile  = templateDir + "home.html"
-	linkTmplFile  = templateDir + "link.html"
-	nowTmplFile   = templateDir + "now.html"
-	errorTmplFile = templateDir + "error.html"
+	baseTmplFile  = baseTmplName + ".html"
+	homeTmplFile  = "home.html"
+	linkTmplFile  = "link.html"
+	nowTmplFile   = "now.html"
+	errorTmplFile = "error.html"
 
 	// the exported templates that are available to render
 	Home  = mustParse(homeTmplFile)
@@ -36,8 +38,15 @@ type tmpl struct {
 }
 
 func mustParse(tmplFile string) tmpl {
-	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(baseTmplFile,
-		tmplFile))
+	_, currFile, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("can't find templates")
+	}
+	templateDir := filepath.Join(filepath.Dir(currFile), relTemplateDir)
+
+	base := path.Join(templateDir, baseTmplFile)
+	cont := path.Join(templateDir, tmplFile)
+	t := stdtemplate.Must(stdtemplate.New(baseTmplName).ParseFiles(base, cont))
 	return tmpl{Template: t}
 }
 

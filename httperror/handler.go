@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Sam Olds
+// Copyright (C) 2018 - 2019 Sam Olds
 
 package httperror
 
@@ -23,6 +23,10 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error: %s", err)
 		w.WriteHeader(herr.StatusCode)
-		http.Error(w, herr.Error(), herr.StatusCode)
+		if herr.StatusCode == http.StatusInternalServerError {
+			http.Error(w, "internal server error", herr.StatusCode)
+		} else {
+			http.Error(w, herr.Error(), herr.StatusCode)
+		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Sam Olds
+// Copyright (C) 2018 - 2019 Sam Olds
 
 package port
 
@@ -22,6 +22,10 @@ type Options struct {
 type Server struct {
 	router http.Handler
 	db     *database.DB
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
 }
 
 // New initializes a new http handler for this web server.
@@ -61,8 +65,14 @@ func herr(h func(context.Context, http.ResponseWriter, *http.Request) error) (
 		err := h(ctx, w, r)
 		if err != nil {
 			log.Printf("error: %s", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			subErr := template.Error.Render(w, "internal server error: "+err.Error())
+			herr := httperror.Catch(err)
+			w.WriteHeader(herr.StatusCode)
+			var subErr error
+			if herr.StatusCode == http.StatusInternalServerError {
+				subErr = template.Error.Render(w, "internal server error")
+			} else {
+				subErr = template.Error.Render(w, "error: "+err.Error())
+			}
 			if subErr != nil {
 				log.Println(subErr.Error())
 				return err
@@ -70,8 +80,4 @@ func herr(h func(context.Context, http.ResponseWriter, *http.Request) error) (
 		}
 		return nil
 	})
-}
-
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w, r)
 }

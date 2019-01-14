@@ -3,6 +3,9 @@
 # license that can be found in the LICENSE file.
 runtime: go111
 
+env_variables:
+  GAE_PROJECT_ID: "samolds"
+
 handlers:
 # Configure App Engine to serve any static assets.
 - url: /static
@@ -13,3 +16,6 @@ handlers:
   secure: always
   redirect_http_response_code: 301
   script: auto
+
+error_handlers:
+  - file: static/errorhtml/all.html

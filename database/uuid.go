@@ -1,3 +1,5 @@
+// Copyright (C) 2018 - 2019 Sam Olds
+
 package database
 
 import (
