@@ -50,7 +50,7 @@ func New(ctx context.Context, opts Options) (*Server, error) {
 
 	mux.Handle("GET", "/", herr(server.Home))
 	mux.Handle("GET", "/now", herr(server.Now))
-	mux.Handle("GET", "/links", herr(server.Link))
+	mux.Handle("GET", "/network", herr(server.Link))
 	server.router = mux
 
 	if opts.StaticDir != "" {

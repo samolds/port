@@ -44,6 +44,8 @@
     .pull-left { float: left; }
     .pull-right { float: right; }
     .clear { clear: both; }
+
+    {{ template "style" . }}
   </style>
 </head>
 <body>
@@ -52,7 +54,7 @@
       <a href="/">samolds.com</a>
     </div>
     <div class="pull-right">
-      <a href="/links">links</a>
+      <a href="/network">network</a>
       <a href="/now">now</a>
     </div>
     <div class="clear"></div>
@@ -63,3 +65,6 @@
 </body>
 </html>
 {{ end }}
+
+{{ define "style" }}{{ end }}
+{{ define "content" }}{{ end }}

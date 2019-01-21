@@ -35,6 +35,7 @@ func (s *Server) Now(ctx context.Context, w http.ResponseWriter,
 	data := make(map[string]interface{})
 	data["htmlText"] = stdtemplate.HTML(now.HTMLText)
 	data["profileImgSrc"] = now.ProfileImgSrc
+	data["creationTime"] = now.CreationTime.Format("Jan _2, 2006")
 	return template.Now.Render(w, data)
 }
 

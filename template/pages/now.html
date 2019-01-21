@@ -1,7 +1,21 @@
+{{ define "style" }}
+.pad-vertical {
+  padding: 0.5em 0;
+}
+{{ end }}
+
 {{ define "content" }}
 {{ if .profileImgSrc }}
 <img class="profile-img pull-right" alt="sam" src="{{ .profileImgSrc }}"/>
 {{ end }}
 {{ .htmlText }}
+<div class="pad-vertical"></div>
+<p>
+  <small>Last updated: {{ .creationTime }}</small>
+  <br />
+  <small>
+    <a href="https://nownownow.com/about">Why not an about page?</a>
+  </small>
+</p>
 <div class="clear"></div>
 {{ end }}
