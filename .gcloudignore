@@ -9,3 +9,4 @@
 .gcloudignore
 static/assetdump
 README.md
+vendor

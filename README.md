@@ -31,7 +31,8 @@ go install -mod=vendor .../port && ../../../../bin/port
 
 ### To Test Everything
 ```sh
-go test .../port/...
+cd $GOPATH/src/github.com/samolds/port
+go test ./...
 ```
 
 
