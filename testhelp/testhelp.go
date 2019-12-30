@@ -1,4 +1,4 @@
-// Copyright (C) 2018 - 2019 Sam Olds
+// Copyright (C) 2018 - 2020 Sam Olds
 
 package testhelp
 

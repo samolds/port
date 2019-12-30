@@ -8,3 +8,6 @@
 
 ## Secrets
 static/assetdump/gae_cred_file_samolds.json
+
+## go mod
+vendor

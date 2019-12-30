@@ -18,13 +18,14 @@ go get github.com/samolds/port
 
 ### Run Dev Version
 ```sh
-cd $GOPATH
-go install .../port && ./bin/port
+cd $GOPATH/src/github.com/samolds/port
+go mod vendor
+go install -mod=vendor .../port && ../../../../bin/port
   --port=":8080"
   --static-dir="/Users/samolds/projects/go/src/github.com/samolds/port/static"
   --gae-project-id="samolds"
   --gae-cred-file="/Users/samolds/projects/go/src/github.com/samolds/port/static/assetdump/gae_cred_file_samolds.json"
-  --rel-html-tmpl-dir="src/github.com/samolds/port/template/pages"
+  --rel-html-tmpl-dir="template/pages"
 ```
 
 
